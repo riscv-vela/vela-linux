@@ -1,2 +1,6 @@
 # vela-linux
 q-vela linux component
+
+
+## version
+- linux kernel: e9a6fb0bcdd7609be6969112f3fbfcce3b1d4a7c
