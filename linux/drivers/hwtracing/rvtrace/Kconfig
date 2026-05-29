@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+menuconfig RVTRACE
+	tristate "RISC-V Trace Support"
+	depends on RISCV
+	depends on OF
+	select PERF_EVENTS
+	default RISCV
+	help
+	  This framework provides a kernel interface for the RISC-V trace
+	  drivers (including both e-trace and n-trace). It's intended to
+	  build a topological view of the RISC-V trace components and
+	  configure the right series of components when trace is enabled
+	  on a CPU.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called rvtrace.
+
+config RVTRACE_ENCODER
+	tristate "RISC-V Trace Encoder driver"
+	depends on RVTRACE
+	default y
+	help
+	  This driver provides support for RISC-V Trace Encoder component.
+
+config RVTRACE_RAMSINK
+	tristate "RISC-V Trace Ramsink driver"
+	depends on RVTRACE
+	default y
+	help
+	  This driver provides support for Risc-V E-Trace Ramsink
+	  component.
