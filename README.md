@@ -9,9 +9,6 @@ emulation platform.
 | **TEE** (Keystone) | Keystone kernel driver — the host-side interface for creating and running enclaves. Enclave isolation is enforced with **RISC-V WorldGuard** instead of Keystone's original PMP-based scheme. |
 | **RAS** (RERI) | Kernel support for the RISC-V Error Record Interface |
 
-Related repositories: [vela-fws](https://github.com/riscv-vela/vela-fws)
-(OpenSBI + Security Monitor), [vela-apps](https://github.com/riscv-vela/vela-apps)
-(SDK, Eyrie runtime, example enclaves).
 
 ---
 
