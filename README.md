@@ -79,8 +79,9 @@ enclave applications that run against this driver.
 
 ## RAS — Kernel Support
 
-RERI support is already applied in `linux/` — there is no patch step. The build
-follows `## Building` above, with **one required configuration change**.
+RERI support is already applied in `linux/` — there is no patch step, and the
+required kernel options are all in the riscv defconfig. The build follows
+`## Building` above.
 
 ### Required kernel options
 
@@ -90,10 +91,11 @@ follows `## Building` above, with **one required configuration change**.
 | `CONFIG_ACPI_APEI_GHES` | `arch/riscv/configs/defconfig` | enabled |
 | `CONFIG_RISCV_SBI_SSE` | `drivers/firmware/riscv/Kconfig` (`default y`) | enabled |
 | `CONFIG_ACPI_APEI_SSE` | `drivers/acpi/apei/Kconfig` (`default y`) | enabled |
-| **`CONFIG_RAS`** | — | **not set — must be enabled manually** |
+| **`CONFIG_RAS`** | `arch/riscv/configs/defconfig` | enabled |
 
-`CONFIG_RAS` is a `menuconfig` symbol with no `default` clause, it is absent
-from the riscv defconfig, and nothing selects it — `ACPI_APEI_GHES` does not.
+`CONFIG_RAS` is a `menuconfig` symbol with no `default` clause and nothing
+selects it — `ACPI_APEI_GHES` does not, and `MEMORY_FAILURE`/`PCIEAER` do not
+apply on riscv. It is therefore listed explicitly in the riscv defconfig.
 
 ### Why `CONFIG_RAS` is required
 
@@ -113,17 +115,11 @@ is easy to miss.
 ```bash
 cd linux
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
-
-./scripts/config --enable RAS
-make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- olddefconfig
 grep '^CONFIG_RAS=' .config          # must print CONFIG_RAS=y
 
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc) Image
 cd ..
 ```
-
-`olddefconfig` has to be re-run after `scripts/config`, which edits `.config`
-as plain text and does not resolve dependent symbols.
 
 The result can be checked before booting — with `CONFIG_RAS=n` these symbols do
 not exist at all:
