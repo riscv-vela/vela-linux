@@ -74,3 +74,84 @@ both consistent.
 See the [q-vela](https://github.com/riscv-vela/q-vela) README for the launch
 command, and [vela-apps](https://github.com/riscv-vela/vela-apps) for the
 enclave applications that run against this driver.
+
+---
+
+## RAS — Kernel Support
+
+RERI support is already applied in `linux/` — there is no patch step. The build
+follows `## Building` above, with **one required configuration change**.
+
+### Required kernel options
+
+| Option | Where it comes from | After a plain `make defconfig` |
+|--------|---------------------|-------------------------------|
+| `CONFIG_ACPI_APEI` | `arch/riscv/configs/defconfig` | enabled |
+| `CONFIG_ACPI_APEI_GHES` | `arch/riscv/configs/defconfig` | enabled |
+| `CONFIG_RISCV_SBI_SSE` | `drivers/firmware/riscv/Kconfig` (`default y`) | enabled |
+| `CONFIG_ACPI_APEI_SSE` | `drivers/acpi/apei/Kconfig` (`default y`) | enabled |
+| **`CONFIG_RAS`** | — | **not set — must be enabled manually** |
+
+`CONFIG_RAS` is a `menuconfig` symbol with no `default` clause, it is absent
+from the riscv defconfig, and nothing selects it — `ACPI_APEI_GHES` does not.
+
+### Why `CONFIG_RAS` is required
+
+A RERI error is delivered as a CPER **generic processor** section. In
+`ghes_do_proc()` that section matches none of the specialised branches and falls
+through to `log_non_standard_event()`, which emits the `ras:non_standard_event`
+tracepoint — the interface rasdaemon subscribes to.
+
+With `CONFIG_RAS=n` that function is an empty inline stub
+(`include/linux/ras.h`) and `drivers/ras/ras.o` is never built, so the
+tracepoint does not exist. The `[Hardware Error]` dmesg report still appears,
+because it is produced by a separate `cper_print_*` path — which is why the gap
+is easy to miss.
+
+### Build
+
+```bash
+cd linux
+make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
+
+./scripts/config --enable RAS
+make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- olddefconfig
+grep '^CONFIG_RAS=' .config          # must print CONFIG_RAS=y
+
+make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc) Image
+cd ..
+```
+
+`olddefconfig` has to be re-run after `scripts/config`, which edits `.config`
+as plain text and does not resolve dependent symbols.
+
+The result can be checked before booting — with `CONFIG_RAS=n` these symbols do
+not exist at all:
+
+```bash
+grep non_standard_event linux/System.map
+```
+
+### Kernel version
+
+**v6.12 or newer.** The RISC-V ACPI RINTC model required to boot this platform
+with `aia=aplic-imsic` landed in v6.12-rc1; v6.8 panics during boot. This tree
+is 6.18.0-rc5.
+
+### In the guest
+
+RERI reporting goes through ACPI (HEST/GHES), so the guest must be booted with
+the EDK2 UEFI firmware from
+[vela-fws](https://github.com/riscv-vela/vela-fws) and
+`-M virt,reri=true,aia=aplic-imsic`. A device-tree boot produces no reports.
+
+`tracefs` is not always mounted automatically — a buildroot initramfs does not
+mount it:
+
+```sh
+mount -t tracefs nodev /sys/kernel/tracing
+ls /sys/kernel/tracing/events/ras/       # non_standard_event
+```
+
+See [q-vela `docs/ras.md`](https://github.com/riscv-vela/q-vela/blob/main/docs/ras.md)
+for the launch command and the RERI injection procedure.
