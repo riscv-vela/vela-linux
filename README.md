@@ -1,6 +1,6 @@
 # vela-linux
 
-Linux kernel components of the [Vela](https://github.com/riscv-vela/vela)
+Linux kernel components of the [Vela-OS](https://github.com/riscv-vela/vela)
 project, running on the [Q-Vela](https://github.com/riscv-vela/q-vela)
 emulation platform. 
 
