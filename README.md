@@ -16,9 +16,8 @@ emulation platform.
 
 ```
 vela-linux/
-├── linux/                     # Linux kernel with the Vela patches applied
-├── linux-keystone-driver/     # Keystone kernel driver (/dev/keystone_enclave)
-└── sdk/include/               # Shared Keystone headers the driver builds against
+└── linux/                     # Linux kernel with the Vela patches applied
+                               #   + Keystone driver (drivers/misc/keystone/)
 ```
 
 **Kernel version:** `e9a6fb0bcdd7609be6969112f3fbfcce3b1d4a7c` (6.18.0-rc5)
@@ -48,28 +47,17 @@ Enabling `CONFIG_CMA` and `CONFIG_DMA_CMA` is recommended: the Keystone driver
 allocates enclave memory from the buddy allocator and falls back to CMA when a
 contiguous region larger than `MAX_PAGE_ORDER` is requested.
 
-### 2. Build the Keystone driver
+### 2. Keystone driver
 
-The driver is built as an out-of-tree module against the kernel from step 1.
-
-```bash
-cd linux-keystone-driver
-make
-cd ..
-```
-
-`LINUXSRC` and `KEYSTONE_SDK_DIR` default to `../linux` and `../sdk`, so no
-arguments are needed for an in-tree layout. The driver Makefile invokes the
-kernel build with `CROSS_COMPILE=riscv64-linux-gnu-`; if your kernel was built
-with a different prefix, edit it or pass `CROSS_COMPILE=` explicitly to keep
-both consistent.
+The Keystone driver (`linux/drivers/misc/keystone/`) is built into the kernel:
+`CONFIG_KEYSTONE_ENCLAVE=y` is set in the riscv defconfig, so step 1 already
+builds it and `/dev/keystone_enclave` exists at boot. No `insmod` is needed.
 
 ### Build Output
 
 | File | Description |
 |------|-------------|
-| `linux/arch/riscv/boot/Image` | S-mode kernel image, passed to QEMU via `-kernel` |
-| `linux-keystone-driver/keystone-driver.ko` | Keystone driver module; `insmod` creates `/dev/keystone_enclave` |
+| `linux/arch/riscv/boot/Image` | S-mode kernel image (Keystone driver built in), passed to QEMU via `-kernel` |
 
 See the [q-vela](https://github.com/riscv-vela/q-vela) README for the launch
 command, and [vela-apps](https://github.com/riscv-vela/vela-apps) for the

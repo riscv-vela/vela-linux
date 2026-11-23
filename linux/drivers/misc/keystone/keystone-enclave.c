@@ -130,7 +130,7 @@ uintptr_t allocate_shm(struct enclave *enclave, uintptr_t size)
     return -1;
   }
 
-  if (shm_init(shm, size))
+  if (keystone_shm_init(shm, size))
   {
     kfree(shm);
     return -1;
@@ -153,7 +153,7 @@ int destroy_shm_by_pa(uintptr_t pa)
     if (cur_entry->pa == pa)
     {
       list_del_init(ptr);
-      shm_destroy(cur_entry);
+      keystone_shm_destroy(cur_entry);
       kfree(cur_entry);
       return 1;
     }

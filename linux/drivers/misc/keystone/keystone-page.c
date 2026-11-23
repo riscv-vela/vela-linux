@@ -145,7 +145,7 @@ int utm_init(struct utm *utm, size_t untrusted_size)
   return 0;
 }
 
-int shm_init(struct shm *shm, size_t shared_size)
+int keystone_shm_init(struct shm *shm, size_t shared_size)
 {
   unsigned long order = 0;
   unsigned long count;
@@ -189,7 +189,7 @@ int shm_init(struct shm *shm, size_t shared_size)
   return 0;
 }
 
-int shm_destroy(struct shm *shm)
+int keystone_shm_destroy(struct shm *shm)
 {
   if (!shm->ptr || !shm->size)
     return 0;

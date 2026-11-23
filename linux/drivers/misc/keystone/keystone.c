@@ -96,6 +96,7 @@ static int __init keystone_dev_init(void)
   if (ret < 0)
   {
     pr_err("keystone_enclave: misc_register() failed\n");
+    return ret;
   }
 
   keystone_dev.this_device->coherent_dma_mask = DMA_BIT_MASK(32);
