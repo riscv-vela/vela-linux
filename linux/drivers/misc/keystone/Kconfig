@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
+config KEYSTONE_ENCLAVE
+	tristate "Keystone enclave driver"
+	depends on RISCV_SBI
+	help
+	  Host-side interface to the Vela Security Monitor: creates and runs
+	  Keystone enclaves through /dev/keystone_enclave.
+
+	  If unsure, say N.

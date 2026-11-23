@@ -122,8 +122,8 @@ paddr_t epm_va_to_pa(struct epm* epm, vaddr_t addr);
 
 uintptr_t allocate_shm(struct enclave *enclave, uintptr_t size);
 int destroy_shm_by_pa(uintptr_t pa);
-int shm_destroy(struct shm *shm);
-int shm_init(struct shm *shm, size_t shared_size);
+int keystone_shm_destroy(struct shm *shm);
+int keystone_shm_init(struct shm *shm, size_t shared_size);
 
 #define keystone_info(fmt, ...) \
   pr_info("keystone_enclave: " fmt, ##__VA_ARGS__)
